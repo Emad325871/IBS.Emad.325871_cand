@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>أداة نسخ النصوص</title>
+  <style>
+    body { font-family: Arial, sans-serif; direction: rtl; padding: 20px; }
+    .section { margin-bottom: 30px; }
+    .section-title { font-weight: bold; font-size: 20px; margin-bottom: 10px; }
+    .item { background: #f1f1f1; padding: 10px; margin-bottom: 5px; cursor: pointer; border-radius: 5px; }
+    .item:hover { background: #ddd; }
+    #login, #editor { display: none; }
+    textarea { width: 100%; height: 200px; }
+    button { padding: 10px 20px; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <div id="login">
+    <h2>أدخل كلمة السر</h2>
+    <input type="password" id="password" />
+    <button onclick="checkPassword()">دخول</button>
+  </div>
+
+  <div id="main"></div>
+
+  <div id="editor">
+    <h2>تعديل البيانات</h2>
+    <textarea id="jsonData"></textarea><br>
+    <button onclick="downloadData()">تحميل البيانات</button>
+  </div>
+
+  <script>
+    const correctPassword = "1234"; // غير الباسورد هنا
+
+    const data = {
+      "قسم 1": ["نص 1", "نص 2"],
+      "قسم 2": ["نص 3", "نص 4"]
+    };
+
+    function checkPassword() {
+      const input = document.getElementById('password').value;
+      if (input === correctPassword) {
+        document.getElementById('login').style.display = 'none';
+        renderData();
+        document.getElementById('editor').style.display = 'block';
+      } else {
+        alert("كلمة السر غير صحيحة");
+      }
+    }
+
+    function renderData() {
+      const main = document.getElementById('main');
+      main.innerHTML = '';
+      for (let section in data) {
+        const div = document.createElement('div');
+        div.className = 'section';
+        const title = document.createElement('div');
+        title.className = 'section-title';
+        title.textContent = section;
+        div.appendChild(title);
+
+        data[section].forEach(text => {
+          const item = document.createElement('div');
+          item.className = 'item';
+          item.textContent = text;
+          item.onclick = () => {
+            navigator.clipboard.writeText(text);
+            alert("تم النسخ");
+          };
+          div.appendChild(item);
+        });
+
+        main.appendChild(div);
+      }
+      document.getElementById('jsonData').value = JSON.stringify(data, null, 2);
+    }
+
+    function downloadData() {
+      const json = document.getElementById('jsonData').value;
+      const blob = new Blob([json], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = "data.json";
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    // عرض صفحة الدخول أولاً
+    document.getElementById('login').style.display = 'block';
+  </script>
+</body>
+</html>
